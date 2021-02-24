@@ -269,7 +269,6 @@ class SwitchBoard
 
   def getaddrinfo(nodename, service, family=nil, socktype=nil, protocol=nil, flags=nil)
     if self.getaddrinfo_callback.nil?
-      $stderr.puts 'using SwitchBoard#getaddrinfo'
       Addrinfo.getaddrinfo(nodename, service, family, socktype, protocol, flags)
     else
       self.getaddrinfo_callback.call(nodename, service, family, socktype, protocol, flags)
@@ -278,9 +277,9 @@ class SwitchBoard
 
   def getaddrinfo=(callback)
     if self.getaddrinfo_callback.nil?
-      dlog('Setting a #getaddrinfo callback', LogSource)
+      dlog('setting a #getaddrinfo callback', LogSource)
     else
-      wlog('Overwriting a previously set #getaddrinfo callback', LogSoruce)
+      wlog('overwriting a previously set #getaddrinfo callback', LogSource)
     end
 
     self.getaddrinfo_callback = callback
