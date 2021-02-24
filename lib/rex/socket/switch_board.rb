@@ -134,6 +134,14 @@ class SwitchBoard
     self.instance.remove_by_comm(comm)
   end
 
+  def self.getaddrinfo(nodename, service, family=nil, socktype=nil, protocol=nil, flags=nil)
+    self.instance.getaddrinfo(nodename, service, family, socktype, protocol, flags)
+  end
+
+  def self.getaddrinfo=(callback)
+    self.instance.getaddrinfo = callback
+  end
+
   ##
   #
   # Instance methods
@@ -259,6 +267,25 @@ class SwitchBoard
     }
   end
 
+  def getaddrinfo(nodename, service, family=nil, socktype=nil, protocol=nil, flags=nil)
+    if self.getaddrinfo_callback.nil?
+      $stderr.puts 'using SwitchBoard#getaddrinfo'
+      Addrinfo.getaddrinfo(nodename, service, family, socktype, protocol, flags)
+    else
+      self.getaddrinfo_callback.call(nodename, service, family, socktype, protocol, flags)
+    end
+  end
+
+  def getaddrinfo=(callback)
+    if self.getaddrinfo_callback.nil?
+      dlog('Setting a #getaddrinfo callback', LogSource)
+    else
+      wlog('Overwriting a previously set #getaddrinfo callback', LogSoruce)
+    end
+
+    self.getaddrinfo_callback = callback
+  end
+
   #
   # The routes array.
   #
@@ -270,13 +297,14 @@ class SwitchBoard
 
 protected
 
+  attr_accessor :getaddrinfo_callback
   attr_writer :routes, :mutex # :nodoc:
 
   #
   # Initializes the underlying stuff.
   #
   def _init
-    if (@_initialized != true)
+    unless @_initialized
       @_initialized = true
       self.routes   = Array.new
       self.mutex    = Mutex.new
